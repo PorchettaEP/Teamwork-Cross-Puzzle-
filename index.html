@@ -11,7 +11,14 @@
       --primary: #2a6de7;
       --accent: #10b981;
       --warning: #ef4444;
-      --bg: #f7f5ff;        /* soft pastel background */
+      /* Page-wide soft pastel */
+      --bg: #f6fbff;        /* soft sky */
+      /* Alternatives:
+         --bg: #fff7f5;     soft peach
+         --bg: #f7f5ff;     soft lavender
+         --bg: #f3fff7;     soft mint
+         --bg: #fffdf3;     soft vanilla
+      */
       --ink: #0f172a;
       --muted: #475569;
       --tile: #ffffff;
@@ -202,26 +209,30 @@
       Teamwork Soft Skills Crossword – clue-based version
       Words: RELIABLE, PARTICIPATES, COOPERATIVE, FLEXIBLE, COMMITTED, RESPECTFUL
       Grid: 15x15
-      Change: Word bank now shows definitions/clues (not the words).
+      Layout updated so each word overlaps; COOPERATIVE × FLEXIBLE now cross at 'I'.
     */
 
     const SIZE = 15;
 
-    // Crossword word placements (fixed layout for clean crossings)
-    // dir: "across" or "down"; row/col are 1-based in this config.
+    // dir: "across" or "down"; row/col are 1-based (easier to read/maintain).
     const WORDS = [
-      { name: "COOPERATIVE", row: 7, col: 2, dir: "across",
+      { name: "COOPERATIVE", row: 8, col: 2, dir: "across",
         clue: "Willing to work with others and share responsibility to reach a common goal." },
-      { name: "RELIABLE",     row: 7, col: 7, dir: "down",
-        clue: "Dependable; others can count on you to follow through and do quality work." },
-      { name: "FLEXIBLE",     row: 10, col: 3, dir: "across",
+
+      { name: "FLEXIBLE",     row: 4, col: 10, dir: "down",
         clue: "Able to adapt to changes, feedback, and new roles without losing focus." },
-      { name: "COMMITTED",    row: 3, col: 10, dir: "down",
-        clue: "Dedicated to the team’s success; you keep promises and stick with tasks." },
-      { name: "RESPECTFUL",   row: 6, col: 5, dir: "down",
-        clue: "Shows consideration for others’ ideas, time, and space; uses positive tone." },
-      { name: "PARTICIPATES", row: 2, col: 2, dir: "down",
+
+      { name: "PARTICIPATES", row: 1, col: 5, dir: "down",
         clue: "Takes part actively in discussions and tasks instead of sitting back." },
+
+      { name: "COMMITTED",    row: 7, col: 3, dir: "down",
+        clue: "Dedicated to the team’s success; you keep promises and stick with tasks." },
+
+      { name: "RELIABLE",     row: 10, col: 8, dir: "across",
+        clue: "Dependable; others can count on you to follow through and do quality work." },
+
+      { name: "RESPECTFUL",   row: 4, col: 6, dir: "down",
+        clue: "Shows consideration for others’ ideas, time, and space; uses positive tone." },
     ];
 
     // --- Build solution grid and inputs map ---
@@ -241,7 +252,8 @@
           const existing = solution[rr][cc];
           const ch = word[i];
           if (existing && existing !== ch) {
-            console.error(`Conflict at ${rr},${cc} for ${w.name}: ${existing} vs ${ch}`);
+            console.error(`Letter conflict at (${rr+1},${cc+1}) while placing ${w.name}: grid has '${existing}', word has '${ch}'`);
+            continue;
           }
           solution[rr][cc] = ch;
         }
@@ -296,7 +308,7 @@
           input.type = "text";
           input.maxLength = 1;
           input.autocomplete = "off";
-          input.inputMode = "latin";
+          input.inputMode = "text";
           input.ariaLabel = `Row ${r+1} Column ${c+1}`;
           input.addEventListener("input", onInput);
           input.addEventListener("keydown", onKey);
@@ -328,10 +340,8 @@
     function renderClueBank() {
       const bank = document.getElementById("wordBank");
       bank.innerHTML = "";
-      // Number clues in grid order for clarity
       const startNumbers = computeStartNumbers();
 
-      // Build a display list with clue numbers
       const items = WORDS.map(w => {
         const r = w.row - 1, c = w.col - 1;
         const num = startNumbers.get(`${r},${c}`);
@@ -449,7 +459,7 @@
       const li = document.querySelector(`.word-bank li[data-word="${wordName}"]`);
       if (li) li.classList.add("active");
 
-      // focus first empty (incorrect) letter, else first
+      // focus first incorrect/empty cell, else first
       const firstEmpty = cells.find(({ key, expected }) => {
         const val = letterCells.get(key)?.inputs[0]?.value.toUpperCase() || "";
         return val !== expected;
@@ -476,11 +486,9 @@
     }
 
     function updateWordStatuses() {
-      // Clear previous styles
       document.querySelectorAll(".cell").forEach(el => el.classList.remove("correct"));
       document.querySelectorAll(".word-bank li").forEach(li => li.classList.remove("done"));
 
-      // For each word, if all letters match, mark green
       for (const w of WORDS) {
         const cells = getWordCells(w.name);
         const allGood = cells.every(({ key, expected }) => {
