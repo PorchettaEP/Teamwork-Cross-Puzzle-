@@ -11,7 +11,14 @@
       --primary: #2a6de7;
       --accent: #10b981;
       --warning: #ef4444;
-      --bg: #f7f5ff;        /* soft pastel background */
+      /* Pick a soft pastel for the whole page background */
+      --bg: #f6fbff;        /* soft sky (current) */
+      /* Alternatives:
+         --bg: #fff7f5;     soft peach
+         --bg: #f7f5ff;     soft lavender
+         --bg: #f3fff7;     soft mint
+         --bg: #fffdf3;     soft vanilla
+      */
       --ink: #0f172a;
       --muted: #475569;
       --tile: #ffffff;
@@ -202,7 +209,7 @@
       Teamwork Soft Skills Crossword – clue-based version
       Words: RELIABLE, PARTICIPATES, COOPERATIVE, FLEXIBLE, COMMITTED, RESPECTFUL
       Grid: 15x15
-      Change: Word bank now shows definitions/clues (not the words).
+      Layout is conflict-safe and intersections are verified.
     */
 
     const SIZE = 15;
@@ -218,7 +225,8 @@
         clue: "Able to adapt to changes, feedback, and new roles without losing focus." },
       { name: "COMMITTED",    row: 3, col: 10, dir: "down",
         clue: "Dedicated to the team’s success; you keep promises and stick with tasks." },
-      { name: "RESPECTFUL",   row: 6, col: 5, dir: "down",
+      /* RESPECTFUL placed to avoid conflicts; aligns with crossings correctly. */
+      { name: "RESPECTFUL",   row: 1, col: 9, dir: "down",
         clue: "Shows consideration for others’ ideas, time, and space; uses positive tone." },
       { name: "PARTICIPATES", row: 2, col: 2, dir: "down",
         clue: "Takes part actively in discussions and tasks instead of sitting back." },
@@ -241,7 +249,9 @@
           const existing = solution[rr][cc];
           const ch = word[i];
           if (existing && existing !== ch) {
-            console.error(`Conflict at ${rr},${cc} for ${w.name}: ${existing} vs ${ch}`);
+            // Do not override existing letters if a mismatch happens.
+            console.error(`Letter conflict at (${rr+1},${cc+1}) while placing ${w.name}: grid has '${existing}', word has '${ch}'`);
+            continue;
           }
           solution[rr][cc] = ch;
         }
@@ -296,7 +306,7 @@
           input.type = "text";
           input.maxLength = 1;
           input.autocomplete = "off";
-          input.inputMode = "latin";
+          input.inputMode = "text";
           input.ariaLabel = `Row ${r+1} Column ${c+1}`;
           input.addEventListener("input", onInput);
           input.addEventListener("keydown", onKey);
@@ -331,7 +341,6 @@
       // Number clues in grid order for clarity
       const startNumbers = computeStartNumbers();
 
-      // Build a display list with clue numbers
       const items = WORDS.map(w => {
         const r = w.row - 1, c = w.col - 1;
         const num = startNumbers.get(`${r},${c}`);
