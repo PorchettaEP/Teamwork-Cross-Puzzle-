@@ -2,14 +2,156 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Teamwork Soft Skills Crossword (Grade 9)</title>
+  <title>Teamwork Soft Skills Crossword – Grade 9</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    :root{
+      --cell: clamp(34px, 4.2vw, 44px);
+      --gap: 4px;
+      --primary: #2a6de7;
+      --accent: #10b981;
+      --warning: #ef4444;
+      --bg: #f7f5ff;        /* soft pastel background */
+      --ink: #0f172a;
+      --muted: #475569;
+      --tile: #ffffff;
+      --block: #0b1020;
+      --active: #fff6cc;
+      --correct: #e8fff3;
+    }
+
+    *{ box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: system-ui, Segoe UI, Roboto, Arial, sans-serif; }
+
+    .page-header {
+      text-align: center;
+      padding: 1.2rem 1rem 0.5rem;
+    }
+    .page-header h1 { margin: 0; font-weight: 800; }
+    .subtitle { margin: 0.25rem 0 0.5rem; color: var(--muted); }
+
+    .puzzle-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 1.25rem;
+      padding: 1rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .grid-panel { display: grid; gap: 0.75rem; align-content: start; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(15, var(--cell));
+      grid-template-rows: repeat(15, var(--cell));
+      gap: var(--gap);
+      background: transparent;
+      touch-action: manipulation;
+    }
+
+    .cell {
+      position: relative;
+      background: var(--tile);
+      border-radius: 6px;
+      box-shadow: 0 1px 0 rgba(0,0,0,.04);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+    .cell.block { background: var(--block); box-shadow: none; }
+
+    .cell .num {
+      position: absolute;
+      top: 4px; left: 6px;
+      font-size: 0.65rem;
+      color: var(--muted);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .cell input.letter {
+      width: 100%; height: 100%;
+      border: 2px solid transparent;
+      border-radius: 6px;
+      background: transparent;
+      text-transform: uppercase;
+      text-align: center;
+      font-weight: 800;
+      font-size: calc(var(--cell) * 0.45);
+      color: var(--ink);
+      outline: none;
+      caret-color: var(--primary);
+    }
+
+    .cell.active input { background: var(--active); }
+    .cell.correct input { background: var(--correct); }
+    .cell.wrong input { border-color: var(--warning); }
+
+    .wordbank-panel {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,.06);
+      align-self: start;
+    }
+
+    .word-bank {
+      list-style: none;
+      margin: 0; padding: 0;
+      display: grid; gap: 8px;
+    }
+    .word-bank li {
+      padding: 10px 12px;
+      border: 1px solid #e6eaf2;
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+      transition: border-color .15s ease, background .15s ease;
+    }
+    .word-bank li:hover { border-color: var(--primary); }
+    .word-bank li.active { background: #eef4ff; border-color: var(--primary); }
+    .word-bank li.done { background: #e8fff3; border-color: var(--accent); color: #065f46; }
+
+    .controls { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    .btn {
+      background: var(--primary); color: #fff;
+      border: none; border-radius: 10px; padding: 10px 14px; font-weight: 700; cursor: pointer;
+    }
+    .btn:hover { filter: brightness(1.05); }
+    .btn-secondary { background: #e2e8f0; color: #111827; }
+
+    .status { min-height: 1.5rem; color: var(--muted); }
+
+    .legend { margin-top: 1rem; }
+    .legend h3, .tips h3 { margin-bottom: 0.25rem; }
+    .swatch {
+      display: inline-block; width: 16px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -2px;
+      border: 1px solid rgba(0,0,0,.08);
+    }
+    .sw-active { background: var(--active); }
+    .sw-correct { background: var(--correct); }
+    .sw-wrong { background: #ffe5e5; border-color: var(--warning); }
+
+    .win-banner {
+      position: fixed; left: 50%; transform: translateX(-50%);
+      bottom: 24px; background: #0cce6b; color: #072d1b;
+      padding: 12px 18px; border-radius: 12px; font-weight: 800;
+      box-shadow: 0 12px 24px rgba(0,0,0,.15);
+    }
+
+    .footer { text-align: center; padding: 1rem; color: var(--muted); }
+
+    @media (max-width: 960px) {
+      .puzzle-wrapper { grid-template-columns: 1fr; }
+      .wordbank-panel { order: 2; }
+    }
+  </style>
 </head>
 <body>
   <header class="page-header">
     <h1>Teamwork Soft Skills Crossword</h1>
-    <p class="subtitle">Click a word in the Word Bank to see where it goes. Click a square and type!</p>
+    <p class="subtitle">Click a clue, then type the letters in the highlighted squares. The page auto‑checks as you go.</p>
   </header>
 
   <main class="puzzle-wrapper">
@@ -24,14 +166,14 @@
     </section>
 
     <aside class="wordbank-panel">
-      <h2>Word Bank</h2>
-      <ul id="wordBank" class="word-bank" role="listbox" aria-label="Word bank">
+      <h2>Clue Bank (Teamwork Meanings)</h2>
+      <ul id="wordBank" class="word-bank" role="listbox" aria-label="Clue bank">
         <!-- Populated by JS -->
       </ul>
 
       <div class="legend">
         <h3>Legend</h3>
-        <p><span class="swatch sw-active"></span> Selected word</p>
+        <p><span class="swatch sw-active"></span> Selected clue</p>
         <p><span class="swatch sw-correct"></span> Completed word</p>
         <p><span class="swatch sw-wrong"></span> Incorrect letter</p>
       </div>
@@ -39,9 +181,9 @@
       <div class="tips">
         <h3>Tips</h3>
         <ul>
-          <li>Click a word to highlight its squares.</li>
+          <li>Click a clue to highlight its squares on the grid.</li>
           <li>Use arrow keys to move between squares.</li>
-          <li>Letters auto‑check as you type.</li>
+          <li>Letters auto‑uppercase and auto‑check.</li>
         </ul>
       </div>
     </aside>
@@ -55,6 +197,361 @@
     <small>Soft Skills Focus: Teamwork — reliable, respectful, cooperative classmates help everyone succeed.</small>
   </footer>
 
-  <script src="script.js"></script>
+  <script>
+    /*
+      Teamwork Soft Skills Crossword – clue-based version
+      Words: RELIABLE, PARTICIPATES, COOPERATIVE, FLEXIBLE, COMMITTED, RESPECTFUL
+      Grid: 15x15
+      Change: Word bank now shows definitions/clues (not the words).
+    */
+
+    const SIZE = 15;
+
+    // Crossword word placements (fixed layout for clean crossings)
+    // dir: "across" or "down"; row/col are 1-based in this config.
+    const WORDS = [
+      { name: "COOPERATIVE", row: 7, col: 2, dir: "across",
+        clue: "Willing to work with others and share responsibility to reach a common goal." },
+      { name: "RELIABLE",     row: 7, col: 7, dir: "down",
+        clue: "Dependable; others can count on you to follow through and do quality work." },
+      { name: "FLEXIBLE",     row: 10, col: 3, dir: "across",
+        clue: "Able to adapt to changes, feedback, and new roles without losing focus." },
+      { name: "COMMITTED",    row: 3, col: 10, dir: "down",
+        clue: "Dedicated to the team’s success; you keep promises and stick with tasks." },
+      { name: "RESPECTFUL",   row: 6, col: 5, dir: "down",
+        clue: "Shows consideration for others’ ideas, time, and space; uses positive tone." },
+      { name: "PARTICIPATES", row: 2, col: 2, dir: "down",
+        clue: "Takes part actively in discussions and tasks instead of sitting back." },
+    ];
+
+    // --- Build solution grid and inputs map ---
+    const solution = Array.from({ length: SIZE }, () => Array(SIZE).fill(null));
+    const letterCells = new Map(); // "r,c" -> { expected, inputs:[inputEl], words:[wordName] }
+
+    function inBounds(r, c) { return r >= 0 && r < SIZE && c >= 0 && c < SIZE; }
+
+    function placeWords() {
+      for (const w of WORDS) {
+        const word = w.name.toUpperCase();
+        let r = w.row - 1, c = w.col - 1;
+        for (let i = 0; i < word.length; i++) {
+          const rr = r + (w.dir === "down" ? i : 0);
+          const cc = c + (w.dir === "across" ? i : 0);
+          if (!inBounds(rr, cc)) continue;
+          const existing = solution[rr][cc];
+          const ch = word[i];
+          if (existing && existing !== ch) {
+            console.error(`Conflict at ${rr},${cc} for ${w.name}: ${existing} vs ${ch}`);
+          }
+          solution[rr][cc] = ch;
+        }
+      }
+    }
+
+    function computeStartNumbers() {
+      const map = new Map();
+      let n = 1;
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          if (!solution[r][c]) continue;
+          const startAcross = (!inBounds(r, c-1) || !solution[r][c-1]) && inBounds(r, c+1) && solution[r][c+1];
+          const startDown   = (!inBounds(r-1, c) || !solution[r-1][c]) && inBounds(r+1, c) && solution[r+1][c];
+          if (startAcross || startDown) map.set(`${r},${c}`, n++);
+        }
+      }
+      return map;
+    }
+
+    function buildGrid() {
+      const grid = document.getElementById("grid");
+      grid.innerHTML = "";
+
+      const startNumbers = computeStartNumbers();
+
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          const wrapper = document.createElement("div");
+          wrapper.className = "cell";
+          wrapper.dataset.row = r;
+          wrapper.dataset.col = c;
+
+          const key = `${r},${c}`;
+          if (!solution[r][c]) {
+            wrapper.classList.add("block");
+            grid.appendChild(wrapper);
+            continue;
+          }
+
+          // numbering
+          const num = startNumbers.get(key);
+          if (num) {
+            const numEl = document.createElement("div");
+            numEl.className = "num";
+            numEl.textContent = num;
+            wrapper.appendChild(numEl);
+          }
+
+          const input = document.createElement("input");
+          input.className = "letter";
+          input.type = "text";
+          input.maxLength = 1;
+          input.autocomplete = "off";
+          input.inputMode = "latin";
+          input.ariaLabel = `Row ${r+1} Column ${c+1}`;
+          input.addEventListener("input", onInput);
+          input.addEventListener("keydown", onKey);
+          input.addEventListener("focus", () => highlightCellWords(r, c));
+          wrapper.appendChild(input);
+
+          if (!letterCells.has(key)) {
+            letterCells.set(key, { expected: solution[r][c], inputs: [], words: [] });
+          }
+          letterCells.get(key).inputs.push(input);
+
+          grid.appendChild(wrapper);
+        }
+      }
+
+      // map cells to words for highlighting
+      for (const w of WORDS) {
+        const word = w.name.toUpperCase();
+        for (let i = 0; i < word.length; i++) {
+          const r = (w.row - 1) + (w.dir === "down" ? i : 0);
+          const c = (w.col - 1) + (w.dir === "across" ? i : 0);
+          const key = `${r},${c}`;
+          const cell = letterCells.get(key);
+          if (cell) cell.words.push(w.name);
+        }
+      }
+    }
+
+    function renderClueBank() {
+      const bank = document.getElementById("wordBank");
+      bank.innerHTML = "";
+      // Number clues in grid order for clarity
+      const startNumbers = computeStartNumbers();
+
+      // Build a display list with clue numbers
+      const items = WORDS.map(w => {
+        const r = w.row - 1, c = w.col - 1;
+        const num = startNumbers.get(`${r},${c}`);
+        return { ...w, number: num || 0 };
+      }).sort((a,b) => a.number - b.number);
+
+      items.forEach(w => {
+        const li = document.createElement("li");
+        li.dataset.word = w.name;
+        li.role = "option";
+        li.innerHTML = `<strong>${w.number} ${w.dir === "across" ? "Across" : "Down"}:</strong> ${w.clue}`;
+        li.addEventListener("click", () => setActiveWord(w.name));
+        bank.appendChild(li);
+      });
+    }
+
+    // --- Interaction logic ---
+    function onInput(e) {
+      const input = e.target;
+      input.value = input.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0,1);
+
+      const wrapper = input.closest(".cell");
+      const r = +wrapper.dataset.row;
+      const c = +wrapper.dataset.col;
+      const key = `${r},${c}`;
+      const expected = letterCells.get(key).expected;
+
+      wrapper.classList.remove("wrong");
+      if (input.value && input.value !== expected) wrapper.classList.add("wrong");
+
+      const activeWord = getActiveWordName();
+      if (activeWord) moveToNextInWord(activeWord, r, c);
+
+      updateWordStatuses();
+      checkWin();
+    }
+
+    function onKey(e) {
+      const input = e.target;
+      const wrapper = input.closest(".cell");
+      const r = +wrapper.dataset.row;
+      const c = +wrapper.dataset.col;
+
+      const active = getActiveWordName();
+
+      if (e.key === "ArrowRight") { focusMove(r, c+1); e.preventDefault(); }
+      else if (e.key === "ArrowLeft") { focusMove(r, c-1); e.preventDefault(); }
+      else if (e.key === "ArrowDown") { focusMove(r+1, c); e.preventDefault(); }
+      else if (e.key === "ArrowUp") { focusMove(r-1, c); e.preventDefault(); }
+      else if (e.key === "Backspace" && !input.value) {
+        if (active) moveToPrevInWord(active, r, c);
+        else focusPrev(r, c);
+        e.preventDefault();
+      }
+    }
+
+    function focusMove(r, c) {
+      if (!inBounds(r, c) || !solution[r]?.[c]) return;
+      const key = `${r},${c}`;
+      const input = letterCells.get(key)?.inputs[0];
+      if (input) input.focus();
+    }
+
+    function focusPrev(r, c) {
+      for (let cc = c-1; cc >= 0; cc--) if (solution[r][cc]) return focusMove(r, cc);
+      for (let rr = r-1; rr >= 0; rr--) {
+        for (let cc = SIZE-1; cc >= 0; cc--) if (solution[rr][cc]) return focusMove(rr, cc);
+      }
+    }
+
+    function getWordCells(wordName) {
+      const w = WORDS.find(W => W.name === wordName);
+      const cells = [];
+      for (let i = 0; i < w.name.length; i++) {
+        const r = (w.row - 1) + (w.dir === "down" ? i : 0);
+        const c = (w.col - 1) + (w.dir === "across" ? i : 0);
+        cells.push({ r, c, key: `${r},${c}`, expected: solution[r][c] });
+      }
+      return cells;
+    }
+
+    function moveToNextInWord(wordName, r, c) {
+      const cells = getWordCells(wordName);
+      let idx = cells.findIndex(p => p.r === r && p.c === c);
+      if (idx === -1) return;
+      idx = Math.min(idx + 1, cells.length - 1);
+      const next = cells[idx];
+      letterCells.get(next.key)?.inputs[0]?.focus();
+    }
+
+    function moveToPrevInWord(wordName, r, c) {
+      const cells = getWordCells(wordName);
+      let idx = cells.findIndex(p => p.r === r && p.c === c);
+      if (idx === -1) return;
+      idx = Math.max(idx - 1, 0);
+      const prev = cells[idx];
+      letterCells.get(prev.key)?.inputs[0]?.focus();
+    }
+
+    let activeWord = null;
+
+    function setActiveWord(wordName) {
+      activeWord = wordName;
+
+      // highlight cells for that word
+      document.querySelectorAll(".cell").forEach(el => el.classList.remove("active"));
+      const cells = getWordCells(wordName);
+      for (const { key } of cells) {
+        const el = findCellElByKey(key);
+        el?.classList.add("active");
+      }
+
+      // highlight in clue bank
+      document.querySelectorAll(".word-bank li").forEach(li => li.classList.remove("active"));
+      const li = document.querySelector(`.word-bank li[data-word="${wordName}"]`);
+      if (li) li.classList.add("active");
+
+      // focus first empty (incorrect) letter, else first
+      const firstEmpty = cells.find(({ key, expected }) => {
+        const val = letterCells.get(key)?.inputs[0]?.value.toUpperCase() || "";
+        return val !== expected;
+      }) || cells[0];
+      letterCells.get(firstEmpty.key)?.inputs[0]?.focus();
+    }
+
+    function getActiveWordName() { return activeWord; }
+
+    function findCellElByKey(key) {
+      const [r, c] = key.split(",").map(Number);
+      return document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+    }
+
+    function highlightCellWords(r, c) {
+      const key = `${r},${c}`;
+      const words = letterCells.get(key)?.words || [];
+      if (words.length === 0) return;
+      if (!activeWord || !words.includes(activeWord)) {
+        setActiveWord(words[0]);
+      } else {
+        setActiveWord(activeWord);
+      }
+    }
+
+    function updateWordStatuses() {
+      // Clear previous styles
+      document.querySelectorAll(".cell").forEach(el => el.classList.remove("correct"));
+      document.querySelectorAll(".word-bank li").forEach(li => li.classList.remove("done"));
+
+      // For each word, if all letters match, mark green
+      for (const w of WORDS) {
+        const cells = getWordCells(w.name);
+        const allGood = cells.every(({ key, expected }) => {
+          const val = letterCells.get(key)?.inputs[0]?.value.toUpperCase() || "";
+          return val === expected;
+        });
+        if (allGood) {
+          for (const { key } of cells) findCellElByKey(key)?.classList.add("correct");
+          document.querySelector(`.word-bank li[data-word="${w.name}"]`)?.classList.add("done");
+        }
+      }
+    }
+
+    function checkWin() {
+      for (const [, info] of letterCells) {
+        const val = info.inputs[0].value.toUpperCase() || "";
+        if (val !== info.expected) {
+          setStatus("Keep going! You’re close.");
+          return;
+        }
+      }
+      setStatus("All correct — amazing teamwork!");
+      showWinBanner();
+    }
+
+    function setStatus(text) {
+      const status = document.getElementById("status");
+      status.textContent = text;
+    }
+
+    function showWinBanner() {
+      const banner = document.getElementById("winBanner");
+      banner.hidden = false;
+      setTimeout(() => { banner.hidden = true; }, 5500);
+    }
+
+    function bindButtons() {
+      document.getElementById("checkBtn").addEventListener("click", () => {
+        let wrongCount = 0;
+        for (const [key, info] of letterCells) {
+          const val = info.inputs[0].value.toUpperCase() || "";
+          const el = findCellElByKey(key);
+          el?.classList.remove("wrong");
+          if (val && val !== info.expected) {
+            el?.classList.add("wrong");
+            wrongCount++;
+          }
+        }
+        updateWordStatuses();
+        setStatus(wrongCount === 0 ? "Looks good! Keep filling remaining squares." : `You have ${wrongCount} incorrect letter${wrongCount===1?"":"s"}.`);
+        checkWin();
+      });
+
+      document.getElementById("resetBtn").addEventListener("click", () => {
+        for (const [, info] of letterCells) info.inputs[0].value = "";
+        document.querySelectorAll(".cell").forEach(el => el.classList.remove("wrong","active","correct"));
+        document.querySelectorAll(".word-bank li").forEach(li => li.classList.remove("done","active"));
+        setStatus("Puzzle reset. You’ve got this!");
+        activeWord = null;
+      });
+    }
+
+    // --- Initialize ---
+    placeWords();
+    buildGrid();
+    renderClueBank();
+    bindButtons();
+
+    // Default: select the first clue
+    setActiveWord(WORDS[0].name);
+    setStatus("Start by choosing a clue, then type the letters in the highlighted squares.");
+  </script>
 </body>
 </html>
