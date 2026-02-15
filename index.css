@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Teamwork Soft Skills Crossword (Grade 9)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="page-header">
+    <h1>Teamwork Soft Skills Crossword</h1>
+    <p class="subtitle">Click a word in the Word Bank to see where it goes. Click a square and type!</p>
+  </header>
+
+  <main class="puzzle-wrapper">
+    <section class="grid-panel">
+      <div id="grid" class="grid" aria-label="Crossword grid" role="application"></div>
+
+      <div class="controls">
+        <button id="checkBtn" type="button" class="btn">Check Progress</button>
+        <button id="resetBtn" type="button" class="btn btn-secondary">Reset</button>
+        <div id="status" class="status" role="status" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <aside class="wordbank-panel">
+      <h2>Word Bank</h2>
+      <ul id="wordBank" class="word-bank" role="listbox" aria-label="Word bank">
+        <!-- Populated by JS -->
+      </ul>
+
+      <div class="legend">
+        <h3>Legend</h3>
+        <p><span class="swatch sw-active"></span> Selected word</p>
+        <p><span class="swatch sw-correct"></span> Completed word</p>
+        <p><span class="swatch sw-wrong"></span> Incorrect letter</p>
+      </div>
+
+      <div class="tips">
+        <h3>Tips</h3>
+        <ul>
+          <li>Click a word to highlight its squares.</li>
+          <li>Use arrow keys to move between squares.</li>
+          <li>Letters auto‑check as you type.</li>
+        </ul>
+      </div>
+    </aside>
+  </main>
+
+  <div id="winBanner" class="win-banner" hidden aria-live="assertive">
+    ✅ Great teamwork! You completed the crossword!
+  </div>
+
+  <footer class="footer">
+    <small>Soft Skills Focus: Teamwork — reliable, respectful, cooperative classmates help everyone succeed.</small>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
